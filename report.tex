@@ -24,7 +24,7 @@
 \author{Lorenz Gerber ({\tt{dv15lgr@cs.umu.se}})} 
 \date{2016-02-18}
 %\revisiondate{2016-01-18}
-\instructor{Lena Kallin Westin / Erik Moström / Lina Ögren}
+\instructor{Lena Kallin Westin / Erik Moström / Jonathan Westin}
 
 
 % DOCUMENT SETTINGS
@@ -66,8 +66,8 @@ program written in C that accomplishes encoding and decoding of
 text files according to the \emph{Huffman} algorithm.
 
 The \emph{Huffman} algoritm is used for data compression, in our case
-for text files. The basic idea is that instead of using 8 bytes for
-every character, fine unique variable length binary representations
+for text files. The basic idea is that instead of using 8 bits for
+every character, find unique variable length binary representations
 for every character where the most common used characters get the
 shortest binary sequences. In practice, this includes several steps:
 First a frequency count table of all characters has to be
@@ -81,7 +81,9 @@ this process will be given in the method description.
 \section{Material and Methods}
 \subsection{Datatypes}
 From the provided datatypes we used \emph{prioqueue} (which is built on
-\emph{list\_2cell}), \emph{tree\_3cell}, and \emph{bitset}. 
+\emph{list\_2cell}), \emph{tree\_3cell}, and \emph{bitset}. Aside from the provided 
+datatypes another composite datatype, \emph{freqChar}, storing a character and associated frequency was
+created. This datatype was the one stored as data in the Huffman tree.
 
 
 
@@ -96,7 +98,40 @@ further work and communication was done remote using the
 afore-mentioned tools. 
 
 \section{Results}
-And our results looked like this...
+blablabla
+
+\section{Program structure}
+\subsection{Parameters}
+This program takes four parameters from the command line. The first one determines whether the 
+user wants to \emph{-encode} or \emph{-decode} the input file. The remaining three parameters represent 
+three files where the first one is the file upon which the frequency analysis will be done, the second one is said 
+input file and the third file is where the result will be saved. 
+
+If user enters option \emph{-encode} the functions \emph{getFrequency}, \emph{buildHuffmanTree}, \emph{traverseTree}, and, \emph{encodeFile} will be called to encode the input file and save the result in the output file. If \emph{-decode} is sent as a parameter \emph{getFrequency}, \emph{buildHuffmanTree}, and, \emph{decodeFile} will be called to decode text in the input file and save the decoded text in output file. And lastly if the user were to give an incorrect option or if the files cannot be opened or in some way return errors the program will exit with an instruction on how to properly use the program.
+
+\subsection{getFrequency}
+In \emph{getFrequency}  frequencies for characters read from the frequency file are calculated.
+All frequencies are stored in an array of size 256, enough to store every character in ASCII, where indexes 0 through 255 
+represent the different symbols. Even though it is probably not read from the file the symbol with ASCII code 4 is given frequency 1. This is because this character is the \emph{end of transmission} sign which will be written during encoding no matter what text is encoded. Once the analysis is done every position with a frequency of 0 is set to 1 to avoid problems while
+building the tree later on. To account for this \emph{real} frequencies are multiplied by 1000 to keep their priority over these artificial values.
+\subsection{compareTrees}
+This function is the function required by the \emph{prioqueue} to correctly enqueue and dequeue trees from the priority queue
+The labels of two root nodes in two different binary trees is inspected. The frequency value in these two freqChars are compared and the tree with a lower value is given higher priority.
+\subsection{buildHuffmanTree}
+Now we have all the tools necessary to construct the Huffman tree. From the frequency array 256 trees are created 
+each with a single node labeled with a freqChar struct storing one of 256 ASCII characters and the frequency value for that character. These trees are then enqueued into a priority queue using the \emph{compareTrees} function so that the trees with the lowest frequencies have the highest priority. 
+
+Then two trees are dequeued and merged into a new tree with a root node storing the sum of frequencies of these two smaller trees. After this the new tree is enqueued again and the process repeats until only one tree remains in the queue. Every character now has its place in a single Huffman tree. The tree is complete and gets returned.
+\subsection{traverseTree}
+Once the tree is built we need to extract binary sequences for every character from it. This is done by using the \emph{traverseTree} function. 
+
+\emph{traverseTree} is a recursive function performing a preorder traversal of a binary tree. In addition to the tree the function takes a binary tree position, an array to store bit sequences, and, an array containing pointers to 256 bitsets as parameters. The function will check if the current position in the tree has left and/or right children. If a left children exists a 0 will be written in the array and the function will make a recursive call with the position of this child. The procedure is the same if a right child exists except that a 1 is written in the array instead of a 0. Once a childless position is found the bit sequence is inserted into a bitset whose pointer is stored in the pointer array. 
+
+\subsection{encodeFile}
+\emph{encodeFile} is the function responsible for encoding the input file. This function will read a character from the input file . From the bit-set-pointer array the correct bitset is chosen. The bit sequence from this bitset is inserted into a new bitset which will store all bit sequences for the entire input file. Last in the sequence a \emph{end of transmission} sign is placed. Once every character has been read and stored as a bit sequence in the compound bitset the function will save the whole compound bitset in the output file.
+
+\subsection{decodeFile}
+In \emph{decodeFile} every symbol in the input file is read and converted back to binary sequence. This sequence is stored in a boolean-array as ones and zeros. The sequence is then used to wander through the tree. For every 1 read we move right and for every 0 we move left until a leaf is reached. Once we reached a leaf the character stored in that leaf's freqChar is read and written in the output file. When \emph{end of transmission} is reached the decoding ends.
 
 \section{Discussion}
 bla bla bla...
