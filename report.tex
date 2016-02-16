@@ -63,7 +63,7 @@
 \section{Introduction} 
 The aim of this laboration was to plan and implement a command line
 program written in C that accomplishes encoding and decoding of 
-text files according to the \emph{Huffman} algorithm.
+text files according to the \emph{Huffman} algorithm \cite{huffman1952}.
 
 The \emph{Huffman} algoritm is used for data compression, in our case
 for text files. The basic idea is that instead of using 8 bits for
@@ -80,11 +80,12 @@ this process will be given in the method description.
 
 \section{Material and Methods}
 \subsection{Datatypes}
-From the provided datatypes we used \emph{prioqueue} (which is built on
-\emph{list\_2cell}), \emph{tree\_3cell}, and \emph{bitset}. Aside from the provided 
-datatypes another composite datatype, \emph{freqChar}, storing a character and associated frequency was
-created. This datatype was the one stored as data in the Huffman tree.
-
+The provided datatypes were all implemented according to descriptions
+in Janlert and Wiberg \cite{janlert2000}. We used \emph{prioqueue}
+(which is built on \emph{list\_2cell}), \emph{tree\_3cell}, and
+\emph{bitset}. Further, we defined a \emph{struct} called
+\emph{freqChar} to store a character and it's associated frequency. 
+This datatype was used as label in the Huffman tree.
 
 
 \subsection{Work Organization}
@@ -99,15 +100,42 @@ afore-mentioned tools.
 
 \section{Results}
 \subsection{Test runs}
-A test run using the provided file löremipsum.txt for the frequency analysis to encode and then decode balenPaEkebyGostaBerlingsSagaSelmaLagerlof.txt resulted in a decoded text which matched the original in every position. The program executed without errors. 
+A test run using the provided file \emph{löremipsum.txt} for the
+frequency analysis to encode and then decode
+\emph{balenPaEkebyGostaBerlingsSagaSelmaLagerlof.txt} resulted in a
+decoded text which matched the original in every position. The program
+executed without errors. Compression values are shown in table \ref{tab:compression}. Testruns with \emph{valgrind} confirmed that 
+there were also no memory leaks. 
 
-Several other test runs have been performed using different, smaller .txt files as well. These include tests on files with every character `a-ö', files with every ASCII sign and various shorter texts. All of these test runs produced correctly encoded/decoded files without problems.
+Several other test runs have been performed using different, smaller
+.txt files as well. These include tests on files with every character
+`a-ö', files with every ASCII sign and various shorter texts. All of
+these test runs produced correctly encoded/decoded files without
+problems.
 
-The program has also been tested with too few/incorrect parameters as well as files which could not be opened. These tests resulted in the program exiting with the correct error messages as was to be expected. 
 
-\section{Program structure}
+The program has also been tested with too few/incorrect parameters as
+well as files which could not be opened. These tests resulted in the
+program exiting with the correct error messages as was to be expected.
+
+\begin{table}[]
+\centering
+\caption{File compression values. The \emph{Löremipsum} text was in
+  both cases used to determine the frequency table.}
+\label{tab:compression}
+\begin{tabular}{lccc}
+(all values in bytes) & \multicolumn{1}{l}{before} & \multicolumn{1}{l}{encoded} & \multicolumn{1}{l}{decoded} \\ \hline
+loremipsum            & 7'815                      & 4'464
+& 7'815                       \\
+lagerlof              & 33'611                     & 22'847
+& 33'612                     
+\end{tabular}
+\end{table}
+
+
+\subsection{Program structure}
 Essentially this program consists of six different \emph{central} functions. These are complemented by a few simple functions to print error messages et cetera. The functions are called from main depending on command line parameters input by user and apart from those parameters there is no user interaction. Following is a brief description of the six functions as well as a few words about the command line parameters.
-\subsection{Parameters}
+\subsubsection{Parameters}
 This program takes four parameters from the command line. The first one determines whether the 
 user wants to \emph{-encode} or \emph{-decode} the input file. The remaining three parameters represent 
 three files where the first one is the file upon which the frequency analysis will be done, the second one is said 
@@ -115,35 +143,90 @@ input file and the third file is where the result will be saved.
 
 If user enters option \emph{-encode} the functions \emph{getFrequency}, \emph{buildHuffmanTree}, \emph{traverseTree}, and, \emph{encodeFile} will be called to encode the input file and save the result in the output file. If \emph{-decode} is sent as a parameter \emph{getFrequency}, \emph{buildHuffmanTree}, and, \emph{decodeFile} will be called to decode text from the input file and save the decoded text in the output file. And lastly if the user were to give an incorrect option or if at least one file cannot be opened the program will exit with an instruction on how to properly use the program.
 
-\subsection{getFrequency}
+\subsubsection{getFrequency}
 In \emph{getFrequency}  frequencies for characters read from the frequency file are calculated.
 All frequencies are stored in an array of size 256, enough to store every character in ASCII, where indexes 0 through 255 
-represent the different symbols. Even though it is probably not read from the file the symbol with ASCII code 4 is given frequency 1. This is because this character is the \emph{end of transmission} sign which will be written during encoding no matter what text is encoded. Once the analysis is done every position with a frequency of 0 is set to 1 to avoid problems while
-building the tree later on. To account for this \emph{real} frequencies are multiplied by 1000 so that they keep their position as more frequent.
+represent the different symbols. Even though it is probably not read
+from the file the symbol with ASCII code 4 is given frequency 1. This
+is because this character is the \emph{end of transmission} sign which
+will be written during encoding no matter what text is encoded. 
 
-\subsection{compareTrees}
+After the frequency analysis we implemented a short code snippet to
+handle the case of zero frequencies. The code first multiplies each
+frequency value by 1000 and adds then 1 to every zero frequency. The
+implications of this code will be treated in the discussion.
+
+\subsubsection{compareTrees}
 This function is the function required by the \emph{prioqueue} to correctly enqueue and dequeue trees from the priority queue.
 The labels of two root nodes in two different binary trees is inspected. The frequency value in these two \emph{freqChars} are compared and the tree with the lower value is given higher priority.
 
-\subsection{buildHuffmanTree}
+\subsubsection{buildHuffmanTree}
 Now we have all the tools necessary to construct the Huffman tree. This function uses the provided data types \emph{prioqueue} and \emph{tree\_3cell}. From the frequency array 256 trees are created 
 each with a single node labeled with a \emph{freqChar} struct storing one of 256 ASCII characters and the frequency value for that character. These trees are then enqueued into a priority queue using the \emph{compareTrees} function so that the trees with the lowest frequencies have the highest priority. 
 
 Then two trees are taken from the front of the queue and merged into a new tree with a parent root node storing the sum of frequencies of these two smaller trees. After this the new tree is enqueued again and the process is repeated until only one tree remains in the queue. When this occurs every character has its place in a single Huffman tree thus completing the tree which is returned.
 
-\subsection{traverseTree}
+\subsubsection{traverseTree}
 Once the tree is built we need to extract binary sequences for every character from it. This is done by using the \emph{traverseTree} function. 
 
 \emph{traverseTree} is a recursive function performing a preorder traversal of a binary tree. In addition to the binary tree the function takes a binary tree position, an array to store bit sequences, and, an array containing pointers to 256 bitsets as parameters. The function will check if the current position in the tree has left and/or right children. If a left children exists a zero will be written in the array and the function will make a recursive call with the position of this child. The procedure is the same if a right child exists except that a one is written in the array instead of a zero. Once a childless position is found the bit sequence is inserted into a bitset whose pointer is stored in the pointer array and once every leaf has been visited the function is complete.
 
-\subsection{encodeFile}
+\subsubsection{encodeFile}
 \emph{encodeFile} is the function responsible for encoding the input file. This function will read one character at a time from the input file . From the bit-set-pointer array the correct bitset is chosen. The bit sequence from this bitset is inserted into a new bitset which will store all bit sequences for the entire input file. Last in the sequence an \emph{end of transmission} sign is placed. Once every character has been read and stored as a bit sequence in the compound bitset the function will save the whole compound bitset in the output file.
 
-\subsection{decodeFile}
+\subsubsection{decodeFile}
 In \emph{decodeFile} every symbol in the input file is read and converted back to binary sequence. This sequence is stored in a boolean-array as ones and zeros. The sequence is then used to wander through the Huffman tree. For every `1' read we move right and for every `0' we move left until a leaf is reached. Once we reach a leaf the character stored in that leaf's \emph{freqChar} is read and written in the output file. When \emph{end of transmission} is reached the decoding ends.
 
 \section{Discussion}
-We are satisfied with our program. The encoding and decoding work as intended and all of our test runs went well. Perhaps we should have implemented more checks for errors in parameters and files but those in the code have been sufficient for every test we have performed. Another area to improve upon might be the use of \emph{freqChar} which turned out to be a bit awkward, it is possible another data type would have been easier to use although \emph{freqChar} is simple and easy to understand. Overall the work progressed without any major problems. 
+\subsection{Zero Frequency Chars}
+As mentioned in the course homepage, zero frequency characters have
+special effect on the huffman tree building procedure. Usually, adding
+two trees with the lowest value would raise the new tree to a higher
+value. However, this doesn't happen with zero value trees until they
+get combined with such that have a value larger than
+zero. Practically, this lead to trees where all inital zero value
+chars end up in the same branch as a long tail. Our initial idea to
+avoid this scenario was to raise all zero frequncies to value
+one. However, this would slightly modify the distribution of
+characters with low frequency. Whether this is a problem or not, would
+have to be determined in more depth, however we came up with a
+solution that circumvents this situation. After determining the
+frequencies, all values are multiplied by 1000, which does not affect
+the zero values but keeps the order among the chars with a frquency
+value of 1 and higher. Then all zero values are set to value 1. This
+will basically result in two well shaped subtrees.  
+
+\subsection{Bitset operations}
+The implemented datatype \emph{bitset} has an operation to \emph{export} the
+bitset into a \emph{char} array. We used this operation to prepare the
+data for writing to file. However, there is no matching operation
+implemented to \emph{import} a char vector into a \emph{bitset}, which
+would have been our prefered solution. For simplicity, we did not
+modify the datatype \emph{bitset} but used a double \emph{for} loop
+with a \emph{bitshift} operator to convert the encoded data back. 
+
+\subsection{File operations}
+Currently we use the functions \emph{fgetc()}, \emph{fputc} and
+\emph{fprintf} for file I/O. In \emph{getFrequency()} and
+\emph{encodeFile()} we open the file stream with the argument `rt'
+while in \emph{decodeFile()} we open it with `rb'. The latter was
+necessary to use the functions \emph{fseek()} and \emph{ftell} for
+determining file size. File size was neccessary to set the upper 
+limit of the read loop and to allocate dynamic memory
+for the bit sequence to be converted. This is probably not the
+sleekest possible solution, however we tested several others that 
+did not work as reliable as the implemented one. 
+
+\section{Conclusions}
+We are satisfied with our program. The encoding and decoding work as
+intended and all of our test runs went well. Perhaps we should have
+implemented more checks for errors in parameters and files but those
+in the code have been sufficient for every test we have
+performed. Another area to improve upon might be the use of
+\emph{freqChar} which turned out to be a bit awkward, it is possible
+another data type would have been easier to use although
+\emph{freqChar} is simple and easy to understand. Overall the work
+progressed without any major problems. 
 
 \section{Contributions}
 Both authors were involved in every function with either writing or
