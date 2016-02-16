@@ -98,9 +98,15 @@ further work and communication was done remote using the
 afore-mentioned tools. 
 
 \section{Results}
-blablabla
+\subsection{Test runs}
+A test run using the provided file löremipsum.txt for the frequency analysis to encode and then decode balenPaEkebyGostaBerlingsSagaSelmaLagerlof.txt resulted in a decoded text which matched the original in every position. The program executed without errors. 
+
+Several other test runs have been performed using different, smaller .txt files as well. These include tests on files with every character `a-ö', files with every ASCII sign and various shorter texts. All of these test runs produced correctly encoded/decoded files without problems.
+
+The program has also been tested with too few/incorrect parameters as well as files which could not be opened. These tests resulted in the program exiting with the correct error messages as was to be expected. 
 
 \section{Program structure}
+Essentially this program consists of six different \emph{central} functions. These are complemented by a few simple functions to print error messages et cetera. The functions are called from main depending on command line parameters input by user and apart from those parameters there is no user interaction. Following is a brief description of the six functions as well as a few words about the command line parameters.
 \subsection{Parameters}
 This program takes four parameters from the command line. The first one determines whether the 
 user wants to \emph{-encode} or \emph{-decode} the input file. The remaining three parameters represent 
@@ -137,7 +143,7 @@ Once the tree is built we need to extract binary sequences for every character f
 In \emph{decodeFile} every symbol in the input file is read and converted back to binary sequence. This sequence is stored in a boolean-array as ones and zeros. The sequence is then used to wander through the Huffman tree. For every `1' read we move right and for every `0' we move left until a leaf is reached. Once we reach a leaf the character stored in that leaf's \emph{freqChar} is read and written in the output file. When \emph{end of transmission} is reached the decoding ends.
 
 \section{Discussion}
-bla bla bla...
+We are satisfied with our program. The encoding and decoding work as intended and all of our test runs went well. Perhaps we should have implemented more checks for errors in parameters and files but those in the code have been sufficient for every test we have performed. Another area to improve upon might be the use of \emph{freqChar} which turned out to be a bit awkward, it is possible another data type would have been easier to use although \emph{freqChar} is simple and easy to understand. Overall the work progressed without any major problems. 
 
 \section{Contributions}
 Both authors were involved in every function with either writing or
