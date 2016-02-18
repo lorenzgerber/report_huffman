@@ -104,7 +104,7 @@ A test run using the provided file \emph{löremipsum.txt} for the
 frequency analysis to encode and then decode
 \emph{balenPaEkebyGostaBerlingsSagaSelmaLagerlof.txt} resulted in a
 decoded text which matched the original in every position. The program
-executed without errors. Compression values are shown in table \ref{tab:compression}. Testruns with \emph{valgrind} confirmed that 
+executed without errors. Compression values are shown in \textit{table \ref{tab:compression}}. Testruns with \emph{valgrind} confirmed that 
 there were also no memory leaks. 
 
 Several other test runs have been performed using different, smaller
@@ -120,8 +120,8 @@ program exiting with the correct error messages as was to be expected.
 
 \begin{table}[]
 \centering
-\caption{File compression values. The \emph{Löremipsum} text was in
-  both cases used to determine the frequency table.}
+\caption{\textit{File compression values. The \emph{Löremipsum} text was in
+  both cases used to determine the frequency table.}}
 \label{tab:compression}
 \begin{tabular}{lccc}
 (all values in bytes) & \multicolumn{1}{l}{before} & \multicolumn{1}{l}{encoded} & \multicolumn{1}{l}{decoded} \\ \hline
@@ -134,7 +134,21 @@ lagerlof              & 33'611                     & 22'847
 
 
 \subsection{Program structure}
-Essentially this program consists of six different \emph{central} functions. These are complemented by a few simple functions to print error messages et cetera. The functions are called from main depending on command line parameters input by user and apart from those parameters there is no user interaction. Following is a brief description of the six functions as well as a few words about the command line parameters.
+Essentially this program consists of six different \emph{central}
+functions (see \textit{Fig. \ref{fig:flow}}). These are complemented by a few simple functions to print
+error messages et cetera. The functions are called from main depending
+on command line parameters input by user and apart from those
+parameters there is no user interaction. Following is a brief
+description of the six functions as well as a few words about the
+command line parameters.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{huffman_flowchart.png}
+\caption{\textit{Flowchart of Huffman coding implementation in C.}}
+\label{fig:flow}
+\end{figure}
+
 \subsubsection{Parameters}
 This program takes four parameters from the command line. The first one determines whether the 
 user wants to \emph{-encode} or \emph{-decode} the input file. The remaining three parameters represent 
@@ -230,13 +244,13 @@ progressed without any major problems.
 
 \section{Contributions}
 Both authors were involved in every function with either writing or
-debugging/checking it. The initials in table \ref{tab:contribution}
+debugging/checking it. The initials in \textit{table \ref{tab:contribution}}
 stand for the person who initially wrote the respective function.
 
 
 \begin{table}[]
 \centering
-\caption{work contributionsn}
+\caption{\textit{work contribution}}
 \label{tab:contribution}
 \begin{tabular}{ll}
 planning and defining the strategy & SAN, LGR \\
